@@ -1,0 +1,19 @@
+{
+    "name": "leon-witlif/keyword-generator",
+    "license": "MIT",
+    "description": "TextRank algorithm implementation for keyword extraction",
+    "authors": [
+        {
+            "name": "Leon Witlif",
+            "email": "social@leon-witlif.de"
+        }
+    ],
+    "require": {
+        "php": "^8.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "KeywordGenerator\\": "src/"
+        }
+    }
+}

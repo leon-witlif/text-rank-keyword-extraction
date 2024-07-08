@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+require 'vendor/autoload.php';
+
+use KeywordGenerator\Collection\StopWordCollection;
+use KeywordGenerator\Struct\Keyword;
+
 $language = 'en';
 
 class TaggedWord
@@ -247,36 +252,23 @@ foreach ($lemmatizedWords as $word) {
 $wantedPOS = ['NN', 'NNS', 'NNP', 'NNPS', 'JJ', 'JJR', 'JJS', 'VBG', 'FW'];
 
 $stopWords = array_filter($lemmatizedWords, fn (TaggedWord $word) => !in_array($word->getTag(), $wantedPOS) /*|| !$word->isProcessed()*/);
-$stopWords = array_map(fn (TaggedWord $word) => $word->token, $stopWords);
-
-function loadStopWordsFromFile(string $filePath): array
-{
-    $stopWords = [];
-
-    $lines = file($filePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-    $lines = array_map(fn (string $line) => trim($line), $lines);
-
-    foreach ($lines as $line) {
-        $stopWords[] = $line;
-    }
-
-    return $stopWords;
-}
+$stopWordCollection = new StopWordCollection(array_map(fn (TaggedWord $word): string => $word->token, $stopWords));
 
 if ($language === 'en') {
-    array_push($stopWords, ...[...loadStopWordsFromFile('stopwords-english-1.txt'), 'corresponding']);
+    $stopWordCollection->merge(
+        StopWordCollection::fromFile('stopwords-english-1.txt'),
+        new StopWordCollection(['corresponding'])
+    );
 } else {
-    array_push($stopWords, ...loadStopWordsFromFile('stopwords-german-1.txt'));
-    // array_push($stopWords, ...loadStopWordsFromFile('stopwords-german-2.txt'));
+    $stopWordCollection->merge(StopWordCollection::fromFile('stopwords-german-1.txt'));
+    // $stopWordCollection->merge(StopWordCollection::fromFile('stopwords-german-2.txt'));
 }
-
-$stopWords = array_values(array_unique($stopWords));
 
 function removeStopWords(TaggedWord ...$words): array
 {
-    global $stopWords;
+    global $stopWordCollection;
 
-    $words = array_filter($words, fn (TaggedWord $word) => !in_array($word->token, $stopWords));
+    $words = array_filter($words, fn (TaggedWord $word) => !$stopWordCollection->contains($word->token));
     $words = array_values($words);
 
     return $words;
@@ -366,7 +358,8 @@ for ($iteration = 0; $iteration < $maxIterations; $iteration++) {
             if (isset($weightedEdge[$i][$j])) {
                 try {
                     $summation += $weightedEdge[$i][$j] / $inout[$j] * $score[$j];
-                } catch (Error) {}
+                } catch (Error) {
+                }
             }
         }
 
@@ -382,7 +375,7 @@ $phrases = [];
 $phrase = ' ';
 
 foreach ($lemmatizedText as $word) {
-    if (in_array($word, $stopWords)) {
+    if ($stopWordCollection->contains($word)) {
         if ($phrase !== ' ') {
             $phrases[] = explode(' ', trim($phrase));
         }
@@ -421,8 +414,7 @@ foreach ($uniquePhrases as $phrase) {
         $phraseScore += $score[array_search($word, $vocabulary)];
     }
 
-    $phraseScores[] = $phraseScore;
-    $keywords[] = trim($keyword);
+    $keywords[] = new Keyword(trim($keyword), $phraseScore);
 }
 
 // $counter = 0;
@@ -431,5 +423,10 @@ foreach ($uniquePhrases as $phrase) {
 //     $counter++;
 // }
 
-array_multisort($phraseScores, SORT_DESC, $keywords);
-print_r(array_slice($keywords, 0, 10));
+usort($keywords, fn (Keyword $a, Keyword $b) => $a->score <=> $b->score);
+
+$keywords = array_reverse($keywords);
+
+foreach (array_slice($keywords, 0, 10) as $keyword) {
+    echo $keyword->keyword.PHP_EOL;
+}

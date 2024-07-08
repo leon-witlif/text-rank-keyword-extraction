@@ -16,6 +16,12 @@ Further resources used
 - https://accidentalfactors.com/part-of-speech-tagging/
 - https://www.ling.upenn.edu/courses/Fall_2003/ling001/penn_treebank_pos.html
 
+### Setting up the project
+
+```shell
+composer install
+```
+
 ### Executing the code
 
 ```shell
