@@ -1,0 +1,42 @@
+Shopware 5 erreicht sein End-of-Life: Das Ende einer Ära und der Beginn einer
+neuen
+
+Nach einer bemerkenswerten Laufzeit und der Unterstützung unzähliger
+eCommerce-Plattformen hat Shopware 5 nun offiziell sein End-of-Life erreicht.
+Ende Juli 2024 wird die Entwicklung von Shopware 5 komplett eingestellt. Dies
+markiert nicht nur das Ende einer Ära, sondern auch den Anfang eines neuen
+Kapitels für Online-Händler und Entwickler.
+
+Rückblick auf Shopware 5
+
+Shopware 5 wurde für seine robuste Architektur und seine benutzerfreundliche
+Oberfläche gelobt. Mit Funktionen, die bereits mit Shopware 4 eingeführt wurden,
+hat es über ein Jahrzehnt hinweg den Online-Handel geprägt. Doch die
+Technologien entwickeln sich weiter, und so muss auch die Software, die sie
+unterstützt.
+
+Warum ein Umstieg auf Shopware 6 sinnvoll ist Shopware 6 ist nicht nur eine
+Weiterentwicklung von Shopware 5, sondern eine komplette Neukonzeption, die
+moderne Technologien und Strukturen nutzt. Mit Features wie dem AI Copilot, dem
+Flow Builder und dem Rule Builder bietet Shopware 6 Händlern neue Möglichkeiten,
+ihre Geschäfte zu optimieren und zu personalisieren.
+
+Die Migration von Shopware 5 zu Shopware 6
+
+Für Shopware 5 Kunden stellt Shopware den Migrationsconnector und den
+Migrationsassistenten zur Verfügung, um den Übergang zu erleichtern. Diese Tools
+ermöglichen es, Daten stressfrei in die neue Shopware 6 Umgebung zu übertragen
+und somit den Grundstein für zukünftige Erfolge zu legen.
+
+Sicherheit geht vor
+
+Bis zum End-of-Life-Datum werden noch sicherheitsrelevante Updates für
+Shopware 5 bereitgestellt. Danach jedoch wird es keine Sicherheitsfixes mehr
+geben, was den Umstieg auf Shopware 6 aus Sicherheitsgründen unerlässlich macht.
+
+Fazit
+
+Das Ende von Shopware 5 ist ein Weckruf für alle, die noch auf dieser Plattform
+operieren. Es ist an der Zeit, in die Zukunft zu blicken und die Vorteile von
+Shopware 6 zu nutzen. Die Migration mag eine Herausforderung sein, aber sie ist
+auch eine Chance für Wachstum und Innovation.
