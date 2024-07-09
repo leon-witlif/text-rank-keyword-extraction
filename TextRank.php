@@ -8,98 +8,34 @@ use KeywordGenerator\Collection\StopWordCollection;
 use KeywordGenerator\Enum\Tag;
 use KeywordGenerator\FileSystem\FileSystem;
 use KeywordGenerator\Implementation\TextRank;
+use KeywordGenerator\Linguistics\Dictionary\EmptyDictionary;
+use KeywordGenerator\Linguistics\Dictionary\EnglishDictionary;
 use KeywordGenerator\Linguistics\Filter\EnglishFilter;
 use KeywordGenerator\Linguistics\Filter\GermanFilter;
 use KeywordGenerator\Linguistics\Lemma\EnglishLemmatizer;
 use KeywordGenerator\Linguistics\PartOfSpeech\EnglishTagger;
+use KeywordGenerator\Linguistics\PartOfSpeech\TestTagger;
 use KeywordGenerator\Struct\Keyword;
 use KeywordGenerator\Struct\TaggedWord;
 
 $language = 'en';
 
-$generator = new TextRank(new EnglishFilter(), new EnglishTagger(), new EnglishLemmatizer());
+$filter = new EnglishFilter();
+// $dictionary = new EnglishDictionary();
+$tagger = new TestTagger();
+// $tagger = new EnglishTagger($dictionary);
+$lemmatizer = new EnglishLemmatizer();
 
-$text = implode(' ', FileSystem::readFileContents('sample-english-1.txt'));
-// $text = implode(' ', FileSystem::readFileContents('sample-german-1.txt'));
-// $text = implode(' ', FileSystem::readFileContents('sample-german-2.txt'));
+$generator = new TextRank($filter, $tagger, $lemmatizer);
+
+$text = implode(' ', FileSystem::readFileContents(FileSystem::FILES_DIRECTORY.'/sample-english-1.txt'));
+// $text = implode(' ', FileSystem::readFileContents(FileSystem::FILES_DIRECTORY.'/sample-german-1.txt'));
+// $text = implode(' ', FileSystem::readFileContents(FileSystem::FILES_DIRECTORY.'/sample-german-2.txt'));
 
 $text = strtolower($text);
 
 $lemmatizedWords = $generator->generateKeywords($text);
 // print_r($lemmatizedWords);
-
-$stateWasFirstAllAppearance = false;
-
-function applyPOSTagCorrection(TaggedWord $word): TaggedWord
-{
-    global $stateWasFirstAllAppearance;
-
-    switch ($word->word) {
-        case 'of':
-        case 'over':
-        case 'for':
-        case 'in':
-            $word->tag = Tag::PREPOSITION;
-            break;
-        case 'linear':
-        case 'diophantine':
-        case 'strict':
-        case 'nonstrict':
-        case 'upper':
-        case 'corresponding':
-        case 'mixed':
-            $word->tag = Tag::ADJECTIVE;
-            break;
-        case 'the':
-        case 'a':
-        case 'these':
-            $word->tag = Tag::DETERMINER;
-            break;
-        // case 'inequation':
-        //     $word->token = 'inequations';
-        //     $word->setTag('NNS');
-        //     break;
-        case 'and':
-            $word->tag = Tag::CONJUNCTION;
-            break;
-        // case 'are':
-        //     $word->setTag('VBP');
-        //     break;
-        // case 'given':
-        //     $word->setTag('VBN');
-        //     break;
-        case 'criteria':
-            $word->word = 'criterion';
-            break;
-        case 'supporting':
-            $word->tag = Tag::NOUN;
-            break;
-        // case 'can':
-        //     $word->setTag('MD');
-        //     break;
-        // case 'be':
-        //     $word->setTag('VB');
-        //     break;
-        case 'all':
-            if (!$stateWasFirstAllAppearance) {
-                $word->tag = Tag::DETERMINER;
-                $stateWasFirstAllAppearance = true;
-            } else {
-                // $word->setTag('PDT');
-            }
-            break;
-    }
-
-    return $word;
-}
-
-foreach ($lemmatizedWords as $word) {
-    applyPOSTagCorrection($word);
-}
-
-// foreach ($lemmatizedWords as $word) {
-//     echo $word.', ';
-// }
 
 $wantedPOS = [
     Tag::NOUN,
@@ -109,7 +45,7 @@ $wantedPOS = [
     Tag::ADJECTIVE,
     // 'JJR',
     // 'JJS',
-    // 'VBG',
+   Tag::VERB_GERUND,
     // 'FW',
 ];
 

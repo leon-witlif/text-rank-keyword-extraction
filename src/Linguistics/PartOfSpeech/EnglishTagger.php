@@ -5,14 +5,20 @@ declare(strict_types=1);
 namespace KeywordGenerator\Linguistics\PartOfSpeech;
 
 use KeywordGenerator\Enum\Tag;
+use KeywordGenerator\Linguistics\Dictionary\Dictionary;
 use KeywordGenerator\Struct\TaggedWord;
 
 class EnglishTagger implements Tagger
 {
-    public function __construct(
-        /** @var TaggedWord[] */
-        private array $taggedWords = []
-    ) {
+    private Dictionary $dictionary;
+
+    /** @var TaggedWord[] */
+    private array $taggedWords;
+
+    public function __construct(Dictionary $dictionary)
+    {
+        $this->dictionary = $dictionary;
+        $this->taggedWords = [];
     }
 
     public function tag(string $text): array
@@ -46,6 +52,8 @@ class EnglishTagger implements Tagger
 
     private function tagWords(): void
     {
+        $tagQuote = count($this->taggedWords);
+
         foreach ($this->taggedWords as $taggedWord) {
             if ($taggedWord->word === ',') {
                 $taggedWord->tag = Tag::COMMA;
@@ -57,80 +65,70 @@ class EnglishTagger implements Tagger
                 continue;
             }
 
-            if ($this->isAdverb($taggedWord->word)) {
+            if ($this->dictionary->isNoun($taggedWord->word)) {
+                $taggedWord->tag = Tag::NOUN;
+                continue;
+            }
+
+            if ($this->dictionary->isNounPlural($taggedWord->word)) {
+                $taggedWord->tag = Tag::NOUN_PLURAL;
+                continue;
+            }
+
+            if ($this->dictionary->isPronoun($taggedWord->word)) {
+                $taggedWord->tag = Tag::PRONOUN;
+                continue;
+            }
+
+            if ($this->dictionary->isVerb($taggedWord->word)) {
+                $taggedWord->tag = Tag::VERB;
+                continue;
+            }
+
+            if ($this->dictionary->isVerbGerund($taggedWord->word)) {
+                $taggedWord->tag = Tag::VERB_GERUND;
+                continue;
+            }
+
+            if ($this->dictionary->isVerbPastParticiple($taggedWord->word)) {
+                $taggedWord->tag = Tag::VERB_PAST_PARTICIPLE;
+                continue;
+            }
+
+            if ($this->dictionary->isAdjective($taggedWord->word)) {
+                $taggedWord->tag = Tag::ADJECTIVE;
+                continue;
+            }
+
+            if ($this->dictionary->isAdverb($taggedWord->word)) {
                 $taggedWord->tag = Tag::ADVERB;
                 continue;
             }
 
-            if ($this->isConjunction($taggedWord->word)) {
+            if ($this->dictionary->isConjunction($taggedWord->word)) {
                 $taggedWord->tag = Tag::CONJUNCTION;
                 continue;
             }
 
-            if ($this->isPreposition($taggedWord->word)) {
+            if ($this->dictionary->isPreposition($taggedWord->word)) {
                 $taggedWord->tag = Tag::PREPOSITION;
                 continue;
             }
 
-            if ($this->isDeterminer($taggedWord->word)) {
-                $taggedWord->tag = Tag::DETERMINER;
+            if ($this->dictionary->isInterjection($taggedWord->word)) {
+                $taggedWord->tag = Tag::INTERJECTION;
                 continue;
             }
 
             $taggedWord->tag = Tag::NOUN;
+            --$tagQuote;
         }
-    }
 
-    /**
-     * NN: Noun, singular or mass
-     */
-    private function isNoun(): bool { }
-
-    /**
-     * PRP: Personal pronoun (he, she, it, they)
-     * PRP$: Possessive pronoun (his, its, mine, theirs)
-     */
-    private function isPronoun(): bool { }
-
-    /**
-     * JJ: Adjective
-     */
-    private function isAdjective(): bool { }
-
-    /**
-     * RB: Adverb
-     */
-    private function isAdverb(string $word): bool
-    {
-        return str_ends_with($word, 'ly');
-    }
-
-    /**
-     * CC: Coordinating conjunction (and, but, or, so)
-     */
-    private function isConjunction(string $word): bool
-    {
-        return in_array($word, ['and', 'but', 'or', 'so']);
-    }
-
-    /**
-     * IN: Preposition (on, in, across, after) or subordinating conjunction (because, although, before, since)
-     */
-    private function isPreposition(string $word): bool
-    {
-        return in_array($word, ['on', 'in', 'across', 'after', 'because', 'although', 'before', 'since']);
-    }
-
-    /**
-     * UH: Interjection
-     */
-    private function isInterjection(): bool { }
-
-    /**
-     * DT: Determiner (the, a, an, that, your, many)
-     */
-    private function isDeterminer(string $word): bool
-    {
-        return in_array($word, ['the', 'a', 'an', 'that', 'your', 'many']);
+        echo sprintf(
+                'Tagged %d out of %d words (%d%%)',
+                $tagQuote,
+                count($this->taggedWords),
+                floor($tagQuote / count($this->taggedWords) * 100)
+            ).PHP_EOL;
     }
 }

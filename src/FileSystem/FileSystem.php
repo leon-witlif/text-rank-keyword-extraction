@@ -6,6 +6,8 @@ namespace KeywordGenerator\FileSystem;
 
 class FileSystem
 {
+    public const FILES_DIRECTORY = __DIR__.'/../../files';
+
     /**
      * @return string[]
      */
@@ -16,6 +18,12 @@ class FileSystem
         $lines = [];
 
         while ($line = fgets($handle)) {
+            $line = trim($line);
+
+            if (str_starts_with($line, '#')) {
+                continue;
+            }
+
             $lines[] = $line;
         }
 
