@@ -7,8 +7,12 @@ namespace KeywordGenerator\Linguistics\PartOfSpeech;
 use KeywordGenerator\Enum\Tag;
 use KeywordGenerator\Struct\TaggedWord;
 
-class TestTagger implements Tagger
+class TestTagger extends Tagger
 {
+    public function __construct()
+    {
+    }
+
     /**
      * Returns the POS tags for the text found in files/sample-english-1.txt
      *
@@ -113,5 +117,9 @@ class TestTagger implements Tagger
             new TaggedWord('types', Tag::NOUN_PLURAL),
             new TaggedWord('.', Tag::PERIOD),
         ];
+    }
+
+    protected function tagWords(): void
+    {
     }
 }

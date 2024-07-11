@@ -18,7 +18,7 @@ use KeywordGenerator\Linguistics\PartOfSpeech\TestTagger;
 use KeywordGenerator\Struct\Keyword;
 use KeywordGenerator\Struct\TaggedWord;
 
-switch ('de') {
+switch ('test') {
     case 'test':
     default:
         $filter = new EnglishFilter();
@@ -48,8 +48,8 @@ switch ('de') {
 
 $generator = new TextRank($filter, $tagger, $lemmatizer, $stopWords);
 
-// $text = implode(' ', FileSystem::readFileContents(FileSystem::FILES_DIRECTORY.'/sample-english-1.txt'));
-$text = implode(' ', FileSystem::readFileContents(FileSystem::FILES_DIRECTORY.'/sample-german-1.txt'));
+$text = implode(' ', FileSystem::readFileContents(FileSystem::FILES_DIRECTORY.'/sample-english-1.txt'));
+// $text = implode(' ', FileSystem::readFileContents(FileSystem::FILES_DIRECTORY.'/sample-german-1.txt'));
 // $text = implode(' ', FileSystem::readFileContents(FileSystem::FILES_DIRECTORY.'/sample-german-2.txt'));
 
 $text = strtolower($text);
