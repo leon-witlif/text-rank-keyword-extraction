@@ -5,7 +5,6 @@ declare(strict_types=1);
 require 'vendor/autoload.php';
 
 use KeywordGenerator\Collection\StopWordCollection;
-use KeywordGenerator\Enum\Tag;
 use KeywordGenerator\FileSystem\FileSystem;
 use KeywordGenerator\Implementation\TextRank;
 use KeywordGenerator\Linguistics\Dictionary\EmptyDictionary;
@@ -14,69 +13,52 @@ use KeywordGenerator\Linguistics\Filter\EnglishFilter;
 use KeywordGenerator\Linguistics\Filter\GermanFilter;
 use KeywordGenerator\Linguistics\Lemma\EnglishLemmatizer;
 use KeywordGenerator\Linguistics\PartOfSpeech\EnglishTagger;
+use KeywordGenerator\Linguistics\PartOfSpeech\GermanTagger;
 use KeywordGenerator\Linguistics\PartOfSpeech\TestTagger;
 use KeywordGenerator\Struct\Keyword;
 use KeywordGenerator\Struct\TaggedWord;
 
-$language = 'en';
+switch ('de') {
+    case 'test':
+    default:
+        $filter = new EnglishFilter();
+        $tagger = new TestTagger();
+        $lemmatizer = new EnglishLemmatizer();
+        $stopWords = StopWordCollection::fromFile(FileSystem::FILES_DIRECTORY.'/stopwords-english-1.txt');
+        $stopWords->merge(new StopWordCollection(['corresponding']));
 
-$filter = new EnglishFilter();
-// $dictionary = new EnglishDictionary();
-$tagger = new TestTagger();
-// $tagger = new EnglishTagger($dictionary);
-$lemmatizer = new EnglishLemmatizer();
+        break;
+    case 'en':
+        $filter = new EnglishFilter();
+        $dictionary = new EnglishDictionary();
+        $tagger = new EnglishTagger($dictionary);
+        $lemmatizer = new EnglishLemmatizer();
+        $stopWords = StopWordCollection::fromFile(FileSystem::FILES_DIRECTORY.'/stopwords-english-1.txt');
 
-$generator = new TextRank($filter, $tagger, $lemmatizer);
+        break;
+    case 'de':
+        $filter = new GermanFilter();
+        $dictionary = new EmptyDictionary();
+        $tagger = new GermanTagger($dictionary);
+        // $lemmatizer = new GermanLemmatizer();
+        $stopWords = StopWordCollection::fromFile(FileSystem::FILES_DIRECTORY.'/stopwords-german-1.txt');
 
-$text = implode(' ', FileSystem::readFileContents(FileSystem::FILES_DIRECTORY.'/sample-english-1.txt'));
-// $text = implode(' ', FileSystem::readFileContents(FileSystem::FILES_DIRECTORY.'/sample-german-1.txt'));
+        break;
+}
+
+$generator = new TextRank($filter, $tagger, $lemmatizer, $stopWords);
+
+// $text = implode(' ', FileSystem::readFileContents(FileSystem::FILES_DIRECTORY.'/sample-english-1.txt'));
+$text = implode(' ', FileSystem::readFileContents(FileSystem::FILES_DIRECTORY.'/sample-german-1.txt'));
 // $text = implode(' ', FileSystem::readFileContents(FileSystem::FILES_DIRECTORY.'/sample-german-2.txt'));
 
 $text = strtolower($text);
 
-$lemmatizedWords = $generator->generateKeywords($text);
-// print_r($lemmatizedWords);
-
-$wantedPOS = [
-    Tag::NOUN,
-    Tag::NOUN_PLURAL,
-    Tag::NOUN_PROPER_PLURAL,
-    Tag::NOUN_PROPER_PLURAL,
-    Tag::ADJECTIVE,
-    // 'JJR',
-    // 'JJS',
-   Tag::VERB_GERUND,
-    // 'FW',
-];
-
-$stopWords = array_filter($lemmatizedWords, fn (TaggedWord $word) => !in_array($word->tag, $wantedPOS) /*|| !$word->isProcessed()*/);
-$stopWordCollection = new StopWordCollection(array_map(fn (TaggedWord $word): string => $word->word, $stopWords));
-
-if ($language === 'en') {
-    $stopWordCollection->merge(
-        StopWordCollection::fromFile('stopwords-english-1.txt'),
-        new StopWordCollection(['corresponding'])
-    );
-} else {
-    $stopWordCollection->merge(StopWordCollection::fromFile('stopwords-german-1.txt'));
-    // $stopWordCollection->merge(StopWordCollection::fromFile('stopwords-german-2.txt'));
-}
-
-function removeStopWords(TaggedWord ...$words): array
-{
-    global $stopWordCollection;
-
-    $words = array_filter($words, fn (TaggedWord $word) => !$stopWordCollection->contains($word->word));
-    $words = array_values($words);
-
-    return $words;
-}
-
-$processedWords = removeStopWords(...$lemmatizedWords);
+$processedWords = $generator->generateKeywords($text);
 $processedText = array_map(fn (TaggedWord $word) => $word->word, $processedWords);
 // print_r($processedText);
 
-$lemmatizedText = array_map(fn (TaggedWord $word) => $word->word, $lemmatizedWords);
+$lemmatizedText = array_map(fn (TaggedWord $word) => $word->word, $generator->getLemmatizedWords());
 // print_r($lemmatizedText);
 
 $vocabulary = array_values(array_unique($processedText));
@@ -173,7 +155,7 @@ $phrases = [];
 $phrase = ' ';
 
 foreach ($lemmatizedText as $word) {
-    if ($stopWordCollection->contains($word)) {
+    if ($generator->getStopWordCollection()->contains($word)) {
         if ($phrase !== ' ') {
             $phrases[] = explode(' ', trim($phrase));
         }

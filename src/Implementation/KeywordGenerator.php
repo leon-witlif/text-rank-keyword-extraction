@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace KeywordGenerator;
+namespace KeywordGenerator\Implementation;
 
 use KeywordGenerator\Struct\Keyword;
 

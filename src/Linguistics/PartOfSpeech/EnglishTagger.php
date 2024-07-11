@@ -5,52 +5,10 @@ declare(strict_types=1);
 namespace KeywordGenerator\Linguistics\PartOfSpeech;
 
 use KeywordGenerator\Enum\Tag;
-use KeywordGenerator\Linguistics\Dictionary\Dictionary;
-use KeywordGenerator\Struct\TaggedWord;
 
-class EnglishTagger implements Tagger
+class EnglishTagger extends Tagger
 {
-    private Dictionary $dictionary;
-
-    /** @var TaggedWord[] */
-    private array $taggedWords;
-
-    public function __construct(Dictionary $dictionary)
-    {
-        $this->dictionary = $dictionary;
-        $this->taggedWords = [];
-    }
-
-    public function tag(string $text): array
-    {
-        $this->splitText($text);
-        $this->tagWords();
-
-        return $this->taggedWords;
-    }
-
-    private function splitText(string $text): void
-    {
-        $parts = explode(' ', $text);
-
-        foreach ($parts as $part) {
-            if (!strlen($part)) {
-                continue;
-            }
-
-            if (str_ends_with($part, ',') || str_ends_with($part, '.')) {
-                array_push(
-                    $this->taggedWords,
-                    new TaggedWord(substr($part, 0, -1), Tag::UNTAGGED),
-                    new TaggedWord(substr($part, -1), Tag::UNTAGGED)
-                );
-            } else {
-                $this->taggedWords[] = new TaggedWord($part, Tag::UNTAGGED);
-            }
-        }
-    }
-
-    private function tagWords(): void
+    protected function tagWords(): void
     {
         $tagQuote = count($this->taggedWords);
 
